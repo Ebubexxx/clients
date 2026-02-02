@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import DeliveryOptions from './DeliveryOptions';
 
-// 1. Separate TimeDisplay Component (Clean and Reusable)
+// 1. Separate TimeDisplay Component
 function TimeDisplay() {
   const [time, setTime] = useState(new Date());
 
@@ -26,39 +25,57 @@ function TimeDisplay() {
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [subtotal, setSubTotal] = useState(0);
+  const [shippingCosts, setShippingCosts] = useState({}); // Stores { index: price }
+  const [totalShipping, setTotalShipping] = useState(0);
 
+  // Load cart from LocalStorage
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
     setCartItems(savedCart);
+    
+    // Initialize shipping costs to 0 for all items
+    const initialShipping = {};
+    savedCart.forEach((_, index) => {
+      initialShipping[index] = 0;
+    });
+    setShippingCosts(initialShipping);
   }, []);
+
+  // Calculate Subtotal and Total Shipping whenever items or choices change
+  useEffect(() => {
+    // 1. Calculate Items Price
+    const itemsCents = cartItems.reduce((acc, item) => {
+      return acc + (Number(item.priceCents) * (item.quantity || 1));
+    }, 0);
+
+    // 2. Calculate Combined Shipping from the state object
+    const shippingCents = Object.values(shippingCosts).reduce((a, b) => a + b, 0);
+
+    setSubTotal(itemsCents);
+    setTotalShipping(shippingCents);
+  }, [cartItems, shippingCosts]);
 
   const removeFromCart = (indexToRemove) => {
     const updatedCart = cartItems.filter((_, index) => index !== indexToRemove);
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
+    
+    // Also clean up shipping state for that index
+    const newShipping = { ...shippingCosts };
+    delete newShipping[indexToRemove];
+    setShippingCosts(newShipping);
   };
 
-  {/*Help me with this !!! not anything else please */ }
-  // const AddTotal (cartItems) => {
-  //   const amount = cartItems.map((item, index) {
-  //     return item.priceCents += item.priceCents;
-  //    })
+  const handleRadioChange = (event, index) => {
+    const val = Number(event.target.value);
+    setShippingCosts(prev => ({
+      ...prev,
+      [index]: val
+    }));
+  };
 
-  //   setSubTotal(Number(amount));
-  // }
-
-  // We use useEffect to update the total whenever cartItems changes
-  useEffect(() => {
-    const totalCents = cartItems.reduce((accumulator, item) => {
-      // Ensure we are working with numbers: (Price * Quantity)
-      const itemPrice = Number(item.priceCents) || 0;
-      const itemQuantity = Number(item.quantity) || 1;
-
-      return accumulator + (itemPrice * itemQuantity);
-    }, 0);
-
-    setSubTotal(totalCents);
-  }, [cartItems]);
+  const tax = subtotal * 0.1; // 10% Tax
+  const grandTotal = subtotal + totalShipping + tax;
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
@@ -77,87 +94,94 @@ function Cart() {
       ) : (
         <div className="space-y-6">
           <div className='grid gap-4 lg:grid-cols-12'>
+            
+            {/* Left Side: Cart Items */}
             <div className='col-span-6 lg:col-span-7'>
               <div className="grid gap-4">
                 {cartItems.map((item, index) => (
-                  <div key={index} className="flex items-center gap-6 p-4 border rounded-xl shadow-sm bg-white hover:border-blue-200 transition-colors">
-                    <img
-                      src={item.image.startsWith('http') ? item.image : `/${item.image}`}
-                      alt={item.name}
-                      className="w-24 h-24 object-cover rounded-md bg-gray-100"
-                    />
-
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-gray-800 leading-tight">{item.name}</h4>
-                      <p className="text-gray-500 text-sm mt-1">Quantity: {item.quantity}</p>
-                      <p className="text-[10px] text-gray-300 mt-2 uppercase">ID: {item.productId.split('-')[0]}</p>
-                      <p className='text-lg font-semibold text-gray-800'>${item.priceCents}</p>
+                  <div key={index} className="flex flex-col gap-4 p-5 border rounded-xl shadow-sm bg-white hover:border-blue-200 transition-colors">
+                    <div className="flex items-center gap-6">
+                      <img
+                        src={item.image?.startsWith('http') ? item.image : `/${item.image}`}
+                        alt={item.name}
+                        className="w-20 h-20 object-cover rounded-md bg-gray-100"
+                      />
+                      <div className="flex-1">
+                        <h4 className="text-lg font-bold text-gray-800">{item.name}</h4>
+                        <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                        <p className='text-blue-600 font-bold'>${(item.priceCents / 100).toFixed(2)}</p>
+                      </div>
+                      <button
+                        onClick={() => removeFromCart(index)}
+                        className="text-xs text-red-400 hover:text-red-600 font-semibold uppercase tracking-wider"
+                      >
+                        Remove
+                      </button>
                     </div>
 
-                    <button
-                      onClick={() => removeFromCart(index)}
-                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                      title="Remove Item"
-                    >
-                      Remove
-                    </button>
+                    {/* Delivery Options - ISOLATED PER ITEM */}
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-xs font-bold text-gray-500 uppercase mb-2">Delivery Option</p>
+                      <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                          <input
+                            type="radio"
+                            name={`delivery-group-${index}`} // Unique Name per item
+                            value="0"
+                            checked={shippingCosts[index] === 0}
+                            onChange={(e) => handleRadioChange(e, index)}
+                            className="w-4 h-4"
+                          />
+                          Standard (Free)
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                          <input
+                            type="radio"
+                            name={`delivery-group-${index}`} // Unique Name per item
+                            value="999"
+                            checked={shippingCosts[index] === 999}
+                            onChange={(e) => handleRadioChange(e, index)}
+                            className="w-4 h-4"
+                          />
+                          Express ($9.99)
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className='col-span-6 lg:col-span-5 p-6 border rounded-xl shadow-sm bg-white hover:border-blue-200 transition-colors'>
-              <h2 className='text-xl font-bold text-gray-800 border-b pb-4 mb-4'>
-                Order Summary
-              </h2>
+
+            {/* Right Side: Order Summary */}
+            <div className='col-span-6 lg:col-span-5 p-6 border rounded-xl shadow-sm bg-white self-start sticky top-6'>
+              <h2 className='text-xl font-bold text-gray-800 border-b pb-4 mb-4'>Order Summary</h2>
 
               <div className="space-y-3">
-                {/* Subtotal Row */}
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({cartItems.length} items):</span>
-                  <span className="font-medium text-gray-900">
-                    ${(subtotal).toFixed(2)}
-                  </span>
+                  <span>Items ({cartItems.length}):</span>
+                  <span>${(subtotal / 100).toFixed(2)}</span>
                 </div>
 
-                {/* Shipping Row - You can replace '0' with a variable later */}
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping & handling:</span>
-                  <span className="font-medium text-gray-900">$0.00</span>
+                  <span>${(totalShipping / 100).toFixed(2)}</span>
                 </div>
 
-                {/* Estimated Tax Row (Standard 10% example) */}
                 <div className="flex justify-between text-gray-600 border-b pb-4">
                   <span>Estimated tax (10%):</span>
-                  <span className="font-medium text-gray-900">
-                    ${(subtotal * 0.1).toFixed(2)}
-                  </span>
+                  <span>${(tax / 100).toFixed(2)}</span>
                 </div>
 
-                {/* Order Total Row */}
-                <div className="flex justify-between text-lg font-bold text-red-600 pt-2">
+                <div className="flex justify-between text-xl font-black text-red-600 pt-2">
                   <span>Order total:</span>
-                  <span>
-                    ${(subtotal + (subtotal * 0.1)).toFixed(2)}
-                  </span>
+                  <span>${(grandTotal / 100).toFixed(2)}</span>
                 </div>
               </div>
 
-              <button className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-full transition-all shadow-md">
+              <button className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 rounded-full shadow-lg transform active:scale-95 transition-all">
                 Place your order
               </button>
             </div>
-          </div>
-
-
-          {/* Checkout Summary */}
-          <div className="mt-10 p-8 bg-black text-white rounded-3xl flex justify-between items-center shadow-xl">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-widest">Total Items</p>
-              <span className="text-3xl font-bold">{cartItems.length}</span>
-            </div>
-            <button className="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-gray-200 transition-all transform hover:scale-105">
-              Checkout Now
-            </button>
           </div>
         </div>
       )}

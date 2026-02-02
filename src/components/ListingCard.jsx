@@ -48,7 +48,7 @@ const handleAddToCart = () => {
 
       {/*Name Container */}
       <div className='h-10 mb-1.25'>
-        ${product.name}
+        {product.name}
       </div>
 
       <div className=''>
