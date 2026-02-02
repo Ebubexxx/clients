@@ -209,7 +209,10 @@ function Cart() {
                 </div>
               </div>
 
-              <button className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 rounded-full shadow-lg transform active:scale-95 transition-all">
+              <button 
+              onClick={handlePlaceOrder} 
+              className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 rounded-full shadow-lg transform active:scale-95 transition-all"
+              >
                 Place your order
               </button>
             </div>
