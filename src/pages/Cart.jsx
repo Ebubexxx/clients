@@ -38,6 +38,27 @@ function Cart() {
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
+  {/*Help me with this !!! not anything else please */ }
+  // const AddTotal (cartItems) => {
+  //   const amount = cartItems.map((item, index) {
+  //     return item.priceCents += item.priceCents;
+  //    })
+
+  //   setSubTotal(Number(amount));
+  // }
+
+  // We use useEffect to update the total whenever cartItems changes
+  useEffect(() => {
+    const totalCents = cartItems.reduce((accumulator, item) => {
+      // Ensure we are working with numbers: (Price * Quantity)
+      const itemPrice = Number(item.priceCents) || 0;
+      const itemQuantity = Number(item.quantity) || 1;
+
+      return accumulator + (itemPrice * itemQuantity);
+    }, 0);
+
+    setSubTotal(totalCents);
+  }, [cartItems]);
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
@@ -84,21 +105,46 @@ function Cart() {
                 ))}
               </div>
             </div>
-            <div className='col-span-6 lg:col-span-5 flex items-center gap-6 p-4 border rounded-xl shadow-sm bg-white hover:border-blue-200 transition-colors'>
-              <div className='text-center'>
-                <h2 className='text-lg font-semibold text-gray-800 leading-tight pt-2 pb-6'>
-                  The Order Summary
-                </h2>
+            <div className='col-span-6 lg:col-span-5 p-6 border rounded-xl shadow-sm bg-white hover:border-blue-200 transition-colors'>
+              <h2 className='text-xl font-bold text-gray-800 border-b pb-4 mb-4'>
+                Order Summary
+              </h2>
 
-                <p>Subtotal: </p>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer malesuada tempor euismod. Mauris volutpat, risus vel dapibus elementum, ante est semper orci, a mollis est sapien in elit. Maecenas non enim interdum, faucibus ipsum sit amet, tincidunt eros. Integer dapibus mauris sed nibh congue, ac lacinia tellus auctor. Proin malesuada nisl in ante tincidunt, sed iaculis nulla fringilla. Maecenas maximus quam a nisl cursus faucibus. Aenean vel augue id mauris rutrum consectetur eget eu sapien. Donec rutrum tortor sit amet orci semper, quis eleifend elit aliquam.
+              <div className="space-y-3">
+                {/* Subtotal Row */}
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal ({cartItems.length} items):</span>
+                  <span className="font-medium text-gray-900">
+                    ${(subtotal).toFixed(2)}
+                  </span>
+                </div>
 
-                  Nulla nunc mi, interdum a iaculis a, placerat vel elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam lacus eros, mollis et consequat at, ornare id nisi. Duis aliquet, arcu non scelerisque malesuada, turpis dolor finibus nulla, hendrerit condimentum quam erat et felis. In quis nisl vel quam tincidunt pretium. In consequat neque dolor, a congue augue mollis vitae. In rutrum et dolor vitae pellentesque. Nunc in dolor quam. Praesent sollicitudin rhoncus ex quis luctus. Praesent iaculis felis luctus nisi accumsan, in bibendum mauris congue. Sed vehicula lorem nisl, vitae faucibus erat dictum a. Nulla facilisi. Fusce sit amet odio commodo, maximus ante eu, faucibus ligula.
+                {/* Shipping Row - You can replace '0' with a variable later */}
+                <div className="flex justify-between text-gray-600">
+                  <span>Shipping & handling:</span>
+                  <span className="font-medium text-gray-900">$0.00</span>
+                </div>
 
-                  Nulla ac purus sed leo scelerisque congue nec nec arcu. Quisque vulputate eros a magna imperdiet eleifend. Nunc lacus erat, venenatis eu mi id, maximus fermentum dui. Vivamus non lacus metus. Vivamus vulputate dapibus tellus vitae ullamcorper. Nunc porta tellus sem, at volutpat ipsum elementum sit amet. Proin eros urna, mollis eget consequat ac, gravida vitae lorem. Integer consequat risus quis dolor aliquet gravida.
-                </p>
+                {/* Estimated Tax Row (Standard 10% example) */}
+                <div className="flex justify-between text-gray-600 border-b pb-4">
+                  <span>Estimated tax (10%):</span>
+                  <span className="font-medium text-gray-900">
+                    ${(subtotal * 0.1).toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Order Total Row */}
+                <div className="flex justify-between text-lg font-bold text-red-600 pt-2">
+                  <span>Order total:</span>
+                  <span>
+                    ${(subtotal + (subtotal * 0.1)).toFixed(2)}
+                  </span>
+                </div>
               </div>
+
+              <button className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-full transition-all shadow-md">
+                Place your order
+              </button>
             </div>
           </div>
 
