@@ -32,7 +32,7 @@ function Cart() {
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
     setCartItems(savedCart);
-    
+
     // Initialize shipping costs to 0 for all items
     const initialShipping = {};
     savedCart.forEach((_, index) => {
@@ -59,7 +59,7 @@ function Cart() {
     const updatedCart = cartItems.filter((_, index) => index !== indexToRemove);
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
-    
+
     // Also clean up shipping state for that index
     const newShipping = { ...shippingCosts };
     delete newShipping[indexToRemove];
@@ -76,6 +76,37 @@ function Cart() {
 
   const tax = subtotal * 0.1; // 10% Tax
   const grandTotal = subtotal + totalShipping + tax;
+
+  // --- NEW: Place Order Logic ---
+  const handlePlaceOrder = () => {
+    if (cartItems.length === 0) return;
+
+    const orderData = {
+      orderId: `ORD-${Math.floor(Math.random() * 1000000)}`,
+      date: new Date().toISOString(),
+      items: cartItems.map((item, index) => ({
+        ...item,
+        appliedShippingCents: shippingCosts[index] || 0
+      })),
+      summary: {
+        subtotalCents: subtotal,
+        shippingCents: totalShipping,
+        taxCents: tax,
+        totalCents: grandTotal
+      }
+    };
+
+    // Save to a new localStorage key for orders
+    const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
+    localStorage.setItem('orders', JSON.stringify([...existingOrders, orderData]));
+
+    // Clear the current cart
+    localStorage.removeItem('cart');
+    setCartItems([]);
+    alert("Order Placed Successfully!");
+
+    // Optional: window.location.href = "/orders"; (Redirect to an orders page)
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
@@ -94,7 +125,7 @@ function Cart() {
       ) : (
         <div className="space-y-6">
           <div className='grid gap-4 lg:grid-cols-12'>
-            
+
             {/* Left Side: Cart Items */}
             <div className='col-span-6 lg:col-span-7'>
               <div className="grid gap-4">
