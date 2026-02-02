@@ -13,7 +13,8 @@ const handleAddToCart = () => {
     productId: product.id,
     quantity: quantity,
     name: product.name,
-    image: product.image
+    image: product.image,
+    priceCents: price
   };
 
   // 1. Get current cart from storage, or an empty array if it's empty
