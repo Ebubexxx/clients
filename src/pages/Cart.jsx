@@ -25,15 +25,13 @@ function TimeDisplay() {
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [subtotal, setSubTotal] = useState(0);
-  const [shippingCosts, setShippingCosts] = useState({}); // Stores { index: price }
+  const [shippingCosts, setShippingCosts] = useState({}); 
   const [totalShipping, setTotalShipping] = useState(0);
 
-  // Load cart from LocalStorage
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
     setCartItems(savedCart);
 
-    // Initialize shipping costs to 0 for all items
     const initialShipping = {};
     savedCart.forEach((_, index) => {
       initialShipping[index] = 0;
@@ -41,15 +39,17 @@ function Cart() {
     setShippingCosts(initialShipping);
   }, []);
 
-  // Calculate Subtotal and Total Shipping whenever items or choices change
   useEffect(() => {
-    // 1. Calculate Items Price
+    // Calculate Items Price in CENTS
     const itemsCents = cartItems.reduce((acc, item) => {
-      return acc + (Number(item.priceCents) * (item.quantity || 1));
+      // Ensure we are working with numbers
+      const price = Number(item.priceCents) || 0;
+      const qty = Number(item.quantity) || 1;
+      return acc + (price * qty);
     }, 0);
 
-    // 2. Calculate Combined Shipping from the state object
-    const shippingCents = Object.values(shippingCosts).reduce((a, b) => a + b, 0);
+    // Calculate Shipping in CENTS
+    const shippingCents = Object.values(shippingCosts).reduce((a, b) => Number(a) + Number(b), 0);
 
     setSubTotal(itemsCents);
     setTotalShipping(shippingCents);
@@ -60,7 +60,6 @@ function Cart() {
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
 
-    // Also clean up shipping state for that index
     const newShipping = { ...shippingCosts };
     delete newShipping[indexToRemove];
     setShippingCosts(newShipping);
@@ -74,10 +73,10 @@ function Cart() {
     }));
   };
 
-  const tax = subtotal * 0.1; // 10% Tax
+  // Logic: Cents + Cents + Cents
+  const tax = Math.round(subtotal * 0.1);
   const grandTotal = subtotal + totalShipping + tax;
 
-  // --- NEW: Place Order Logic ---
   const handlePlaceOrder = () => {
     if (cartItems.length === 0) return;
 
@@ -96,15 +95,10 @@ function Cart() {
       }
     };
 
-    // Save to a new localStorage key for orders
     const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
     localStorage.setItem('orders', JSON.stringify([...existingOrders, orderData]));
-
-    // Clear the current cart
     localStorage.removeItem('cart');
     setCartItems([]);
-
-    // Optional: window.location.href = "/orders"; (Redirect to an orders page)
   };
 
   return (
@@ -139,7 +133,8 @@ function Cart() {
                       <div className="flex-1">
                         <h4 className="text-lg font-bold text-gray-800">{item.name}</h4>
                         <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
-                        <p className='text-blue-600 font-bold'>${item.priceCents}</p>
+                        {/* FIX: Divide by 100 for display */}
+                        <p className='text-blue-600 font-bold'>${(Number(item.priceCents) / 100).toFixed(2)}</p>
                       </div>
                       <button
                         onClick={() => removeFromCart(index)}
@@ -149,14 +144,13 @@ function Cart() {
                       </button>
                     </div>
 
-                    {/* Delivery Options - ISOLATED PER ITEM */}
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <p className="text-xs font-bold text-gray-500 uppercase mb-2">Delivery Option</p>
                       <div className="flex gap-6">
                         <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
                           <input
                             type="radio"
-                            name={`delivery-group-${index}`} // Unique Name per item
+                            name={`delivery-group-${index}`}
                             value="0"
                             checked={shippingCosts[index] === 0}
                             onChange={(e) => handleRadioChange(e, index)}
@@ -167,7 +161,7 @@ function Cart() {
                         <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
                           <input
                             type="radio"
-                            name={`delivery-group-${index}`} // Unique Name per item
+                            name={`delivery-group-${index}`}
                             value="999"
                             checked={shippingCosts[index] === 999}
                             onChange={(e) => handleRadioChange(e, index)}
@@ -189,6 +183,7 @@ function Cart() {
               <div className="space-y-3">
                 <div className="flex justify-between text-gray-600">
                   <span>Items ({cartItems.length}):</span>
+                  {/* FIX: Divide by 100 for display */}
                   <span>${(subtotal / 100).toFixed(2)}</span>
                 </div>
 
@@ -208,9 +203,9 @@ function Cart() {
                 </div>
               </div>
 
-              <button 
-              onClick={handlePlaceOrder} 
-              className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 rounded-full shadow-lg transform active:scale-95 transition-all"
+              <button
+                onClick={handlePlaceOrder}
+                className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 rounded-full shadow-lg transform active:scale-95 transition-all"
               >
                 Place your order
               </button>

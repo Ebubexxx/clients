@@ -14,7 +14,7 @@ const handleAddToCart = () => {
     quantity: quantity,
     name: product.name,
     image: product.image,
-    priceCents: price
+    priceCents: product.priceCents
   };
 
   // 1. Get current cart from storage, or an empty array if it's empty
