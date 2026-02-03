@@ -139,7 +139,7 @@ function Cart() {
                       <div className="flex-1">
                         <h4 className="text-lg font-bold text-gray-800">{item.name}</h4>
                         <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
-                        <p className='text-blue-600 font-bold'>${(item.priceCents / 100).toFixed(2)}</p>
+                        <p className='text-blue-600 font-bold'>${item.priceCents}</p>
                       </div>
                       <button
                         onClick={() => removeFromCart(index)}
