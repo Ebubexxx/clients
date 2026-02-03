@@ -3,6 +3,7 @@ import './index.css'
 import Header from './components/Header'
 import ListingCard from './components/ListingCard'
 import Cart from './pages/Cart'
+import ReturnsOrders from './pages/ReturnsOrders'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 
@@ -50,6 +51,7 @@ function App() {
 
         {/* CART PAGE: Only shows when URL is /cart */}
         <Route path="/cart" element={<Cart />} />
+        <Route path='/orders' element={<ReturnsOrders />} />
       </Routes>
     </div>
   )

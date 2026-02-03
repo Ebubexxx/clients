@@ -103,7 +103,6 @@ function Cart() {
     // Clear the current cart
     localStorage.removeItem('cart');
     setCartItems([]);
-    alert("Order Placed Successfully!");
 
     // Optional: window.location.href = "/orders"; (Redirect to an orders page)
   };

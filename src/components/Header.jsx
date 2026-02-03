@@ -17,7 +17,7 @@ function Header() {
 
                 {/* 1. Desktop Menu: ALWAYS visible on large screens (lg:flex) */}
                 <nav className="hidden lg:flex items-center gap-8 font-medium text-sm">
-                    <Link to="/shop" className="flex items-center gap-2 text-black hover:text-blue-600 transition-colors">
+                    <Link to="/" className="flex items-center gap-2 text-black hover:text-blue-600 transition-colors">
                         <ShoppingBasket size={18} /> Shop
                     </Link>
                     <Link to="/support" className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors">
@@ -59,7 +59,7 @@ function Header() {
             {/* 3. Mobile Dropdown: Only shows when isMenuOpen is true AND screen is small */}
             {isMenuOpen && (
                 <div className="absolute top-full left-0 w-full bg-white border-b border-gray-100 py-6 px-8 flex flex-col gap-6 lg:hidden shadow-2xl z-40">
-                    <Link onClick={() => setIsMenuOpen(false)} to="/shop" className="flex items-center gap-3 text-lg font-medium">
+                    <Link onClick={() => setIsMenuOpen(false)} to="/" className="flex items-center gap-3 text-lg font-medium">
                         <ShoppingBasket size={22} /> Shop
                     </Link>
                     <Link onClick={() => setIsMenuOpen(false)} to="/support" className="flex items-center gap-3 text-lg font-medium">
