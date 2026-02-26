@@ -15,7 +15,7 @@ function App() {
 
   useEffect(() => {
     // Ensure products.json is in your /public folder
-    fetch('../public/product.json')
+    fetch('/product.json')
       .then((res) => res.json())
       .then((data) => {
         setProducts(data);
