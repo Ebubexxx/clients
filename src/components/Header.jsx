@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBasket, ShieldCheck, CircleHelp, Search, ShoppingCart, Menu, X } from 'lucide-react';
 
-// So.. we’re grabbing these two things from App.js. 
-// One holds the text, the other changes it. You get the vibe.
+// So.. we’re still grabbing these from App.js to keep the search logic in sync.
 function Header({ searchTerm, setSearchTerm }) {
-    // Just a quick check to see if the mobile menu is popped open or nah.
+    // Just tracking if the mobile menu is popped open or nah.
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        // z-50 is just to make sure this stays on top of everything. No sliding under stuff.
+        // z-50 keeps this on top so nothing slides over your navigation.
         <header className="w-full bg-white border-b border-gray-100 shadow-sm relative z-50">
 
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
-                {/* Just the name of the spot. Simple. */}
+                {/* Just the logo link. Simple vibes. */}
                 <Link to="/" className="text-2xl font-bold tracking-tighter text-blue-600">
                     Ebube
                 </Link>
@@ -31,16 +30,16 @@ function Header({ searchTerm, setSearchTerm }) {
                     </Link>
                 </nav>
 
-                {/* All the clickable actions over on the right side. */}
+                {/* All the clickable actions over on the right. */}
                 <div className="flex items-center gap-4">
-                    {/* Hiding the orders button on tiny screens so it doesn't look messy. */}
-                    <Link to="/orders" className="hidden sm:block">
+                    {/* So.. I removed the 'hidden' class here so this button stops disappearing on mobile. */}
+                    <Link to="/orders">
                         <button className="text-sm font-medium border rounded-full px-5 py-2 hover:bg-gray-50 transition-all">
                             Orders
                         </button>
                     </Link>
 
-                    {/* The cart. Made it black so it pops out more. */}
+                    {/* The cart button. Made it black so it stands out from the rest. */}
                     <Link
                         to="/cart"
                         className="relative z-60 pointer-events-auto flex items-center gap-2 bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800 transition-all"
@@ -49,7 +48,7 @@ function Header({ searchTerm, setSearchTerm }) {
                         <span className="text-sm font-medium">Cart</span>
                     </Link>
 
-                    {/* The hamburger icon for mobile. Click it and things happen. */}
+                    {/* The hamburger icon for mobile users. */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className="p-2 hover:bg-gray-100 rounded-full lg:hidden"
@@ -59,7 +58,7 @@ function Header({ searchTerm, setSearchTerm }) {
                 </div>
             </div>
 
-            {/* This is the mobile menu. It only drops down if you actually click that icon. */}
+            {/* This is the mobile menu. It only drops down if you actually hit that icon. */}
             {isMenuOpen && (
                 <div className="absolute top-full left-0 w-full bg-white border-b border-gray-100 py-6 px-8 flex flex-col gap-6 lg:hidden shadow-2xl z-40">
                     <Link onClick={() => setIsMenuOpen(false)} to="/" className="flex items-center gap-3 text-lg font-medium">
@@ -74,10 +73,10 @@ function Header({ searchTerm, setSearchTerm }) {
                 </div>
             )}
 
-            {/* The search bar part. Centered it so it looks balanced. */}
+            {/* The search bar part. Centered it to keep things looking balanced. */}
             <div className="flex justify-center pb-6 mt-2 px-4">
                 <div className="relative w-full max-w-2xl">
-                    {/* Just a little search icon sitting inside the box. */}
+                    {/* Just a search icon sitting pretty inside the input box. */}
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     
                     <input
@@ -85,13 +84,13 @@ function Header({ searchTerm, setSearchTerm }) {
                         type="text"
                         placeholder="Search for products..."
                         
-                        // So.. this makes the input box show whatever is in the 'searchTerm'.
+                        // Linking the box to the searchTerm state from App.js.
                         value={searchTerm}
-                        // And this part updates the search as soon as you type a letter.
+                        // This part makes the filtering happen as soon as you type.
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
 
-                    {/* This little 'X' button only shows up if you actually typed something. */}
+                    {/* This 'X' button only shows up if the user has actually typed something. */}
                     {searchTerm && (
                         <button 
                             onClick={() => setSearchTerm("")}
